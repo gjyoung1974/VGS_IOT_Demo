@@ -7,6 +7,8 @@ https://github.com/espressif/arduino-esp32
 
 ![esp32x2.jpg](/docs/esp32x2.jpg)    
 
+![esp32x2.jpg](/docs/iot-sensor.jpg)    
+
 
 ~Gordon
  
