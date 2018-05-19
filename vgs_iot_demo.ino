@@ -1,30 +1,23 @@
 /**
- * Authorization.ino
- *
+ * vgs_iot_demo.ino
+ *  gjyoung1974@gmail.com
  *  Created on: 09.12.2015
+ *  Protect and Securely operate on sentive 'sensor network' data
  *
  */
 
 #include <Arduino.h>
-
-//#include <WiFi.h>
 #include <WiFiMulti.h>
 #include <HTTPClient.h>
-
-#define USE_SERIAL Serial
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define USE_SERIAL Serial
+
 #define OLED_RESET 4
-Adafruit_SSD1306 display(OLED_RESET);
+Adafruit_SSD1306 display(OLED_RESET);//enable OLED reset
 
-
-//char *vgs_foward_proxy_url = "tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080";
-//char *vgs_foward_proxy_username = "US2dihmmMZD8BGsQj2yKgjZk";
-//char *vgs_forward_proxy_password = "6e478e95-52ed-4c3b-9493-3aefa7f9137a";
-
-WiFiMulti wifiMulti;
+WiFiMulti wifiMulti; //get a wifi cluent
 
 void setup() {
 
@@ -39,11 +32,8 @@ void setup() {
   // Clear the buffer.
   display.clearDisplay();
 
-  // draw a single pixel
+  // draw a single pixel to start the display
   display.drawPixel(10, 10, WHITE);
-  // Show the display buffer on the hardware.
-  // NOTE: You _must_ call display after making any drawing commands
-  // to make them visible on the display hardware!
   display.display();
   delay(2000);
   display.clearDisplay();
@@ -69,7 +59,7 @@ void setup() {
         delay(1000);
     }
 
-    wifiMulti.addAP("shrutefarms2", "Password1!Password1!");
+    wifiMulti.addAP("some-wifi-ssid", "some-wifi-pass");
 
 }
 
@@ -81,19 +71,18 @@ void loop() {
 
         USE_SERIAL.print("[HTTP] begin...\n");
 
-        //set some headers
+        //set any needed headers
         http.addHeader("Content-Type", "application/json");
         
         // configure traged server and url
-        http.begin("https://tntlvnzzqsz.SANDBOX.verygoodproxy.com/post");
-        //http.begin("http://example.com/");
+        http.begin("https://<some tenant id>.SANDBOX.verygoodproxy.com/post");
 
         //for proxy authentication:
         //http.begin("http://US2dihmmMZD8BGsQj2yKgjZk:6e478e95-52ed-4c3b-9493-3aefa7f9137a@tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
         /*
           // or
-          http.begin("http://192.168.1.12/test.html");
-          http.setAuthorization("US2dihmmMZD8BGsQj2yKgjZk", "6e478e95-52ed-4c3b-9493-3aefa7f9137a");
+          http.begin("http://tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
+          http.setAuthorization("<some user>", "<some password>");
 
         */
 
