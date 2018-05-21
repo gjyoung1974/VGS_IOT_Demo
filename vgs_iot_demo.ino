@@ -63,7 +63,7 @@ void setup() {
         delay(1000);
     }
 
-    wifiMulti.addAP("shrutefarms2", "Password1!Password1!");
+    wifiMulti.addAP("your-wifi", "your-wifi-password");
 
 }
 
@@ -76,19 +76,10 @@ void loop() {
         USE_SERIAL.print("[HTTP] begin...\n");
         
         // configure traged server and url
-        http.begin("https://tntsicixns3.SANDBOX.verygoodproxy.com/post");
+        http.begin("https://<your tenant id>.SANDBOX.verygoodproxy.com/post");
 
         //set any needed headers
         http.addHeader("Content-type", "application/json"); // <<Allows us to filter on just the desired data structures vs all streams
-
-        //for proxy authentication: (forward)
-        //http.begin("http://US2dihmmMZD8BGsQj2yKgjZk:6e478e95-52ed-4c3b-9493-3aefa7f9137a@tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
-        /*
-          // or
-          http.begin("http://tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
-          http.setAuthorization("<some user>", "<some password>");
-
-        */
 
         USE_SERIAL.print("[HTTP] GET...\n");
 
