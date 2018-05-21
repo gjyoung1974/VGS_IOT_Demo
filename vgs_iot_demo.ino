@@ -20,6 +20,9 @@ Adafruit_SSD1306 display(OLED_RESET);//enable OLED reset
 
 WiFiMulti wifiMulti; //get a wifi cluent
 
+char PostData[] = "{\"GPS\": \"334484N1120740WT1526864344\", \"TEMP\": \"48.2C\"}"; // your JSON payload
+StaticJsonBuffer<200> jsonBuffer;
+
 void setup() {
 
   // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
@@ -71,14 +74,16 @@ void loop() {
         HTTPClient http;
 
         USE_SERIAL.print("[HTTP] begin...\n");
-
-        //set any needed headers
-        http.addHeader("Content-Type", "application/json");
         
         // configure traged server and url
-        http.begin("https://<some tenant id>.SANDBOX.verygoodproxy.com/post");
+        http.begin("https://tntsicixns3.SANDBOX.verygoodproxy.com/post");
 
-        //for proxy authentication:
+        //set any needed headers
+        http.addHeader("Content-type", "application/json");
+        http.addHeader("User-Agent", "ich-bin-zuper-iot");
+        //http.addHeader("Content-Length", strlen(PostData));
+
+        //for proxy authentication: (forward)
         //http.begin("http://US2dihmmMZD8BGsQj2yKgjZk:6e478e95-52ed-4c3b-9493-3aefa7f9137a@tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
         /*
           // or
@@ -88,9 +93,9 @@ void loop() {
         */
 
         USE_SERIAL.print("[HTTP] GET...\n");
-        // start connection and send HTTP header
-        //int httpCode = http.GET();
-        int httpCode = http.POST("{\"SensorData\": \"1526699920:33.4484,112.0740\"}");
+
+        //post some data
+        int httpCode = http.POST(PostData);// the payload
 
         // httpCode will be negative on error
         if(httpCode > 0) {
@@ -110,16 +115,31 @@ void loop() {
             if(httpCode == HTTP_CODE_OK) {
                 String payload = http.getString();
                 USE_SERIAL.println(payload);
+              
+                 JsonObject& sJson = jsonBuffer.parseObject(payload);
 
+                // Test if parsing succeeds.
+                if (!sJson.success()) {
+                  Serial.println("parseObject() failed");
+                  return;
+                }
+
+                //get our tokenized sensor value
+                const char* token = sJson["GPS"];
+                String sensor_token = String(token);
+                Serial.println("Sensor Token: " + sensor_token);
+  
                 //text display tests
                 display.display();
                 display.setTextSize(1);
                 display.setTextColor(WHITE);
                 display.setCursor(0,0);
                 display.println(httpCode);
+                display.println("test line 2");
                 display.display();
                 delay(2000);
                 display.clearDisplay();
+                
             }
         } else {
             USE_SERIAL.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -128,6 +148,6 @@ void loop() {
         http.end();
     }
 
-    delay(5000);
+    delay(2000);
 }
 
