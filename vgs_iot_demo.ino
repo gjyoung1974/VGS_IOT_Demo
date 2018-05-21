@@ -79,9 +79,7 @@ void loop() {
         http.begin("https://tntsicixns3.SANDBOX.verygoodproxy.com/post");
 
         //set any needed headers
-        http.addHeader("Content-type", "application/json");
-        http.addHeader("User-Agent", "ich-bin-zuper-iot");
-        //http.addHeader("Content-Length", strlen(PostData));
+        http.addHeader("Content-type", "application/json"); // <<Allows us to filter on just the desired data structures vs all streams
 
         //for proxy authentication: (forward)
         //http.begin("http://US2dihmmMZD8BGsQj2yKgjZk:6e478e95-52ed-4c3b-9493-3aefa7f9137a@tntlvnzzqsz.SANDBOX.verygoodproxy.com:8080");
@@ -113,19 +111,26 @@ void loop() {
 
             // file found at server
             if(httpCode == HTTP_CODE_OK) {
-                String payload = http.getString();
-                USE_SERIAL.println(payload);
               
-                 JsonObject& sJson = jsonBuffer.parseObject(payload);
+                String payload = http.getString(); //get HTTPPost response
+                
+                USE_SERIAL.println(payload); //how does the payload look?
 
-                // Test if parsing succeeds.
-                if (!sJson.success()) {
-                  Serial.println("parseObject() failed");
-                  return;
-                }
+                //convert POST Response payload to char[]   
+                char charPayload[payload.length() + 1];
+                payload.toCharArray(charPayload, payload.length());
+                
+                //load the json
+                JsonObject& obJson = jsonBuffer.parseObject(charPayload);
+
+//                // Test if parsing succeeds.
+//                if (!obJson.success()) {
+//                  Serial.println("parseObject() failed");
+//                  return;
+//                }
 
                 //get our tokenized sensor value
-                const char* token = sJson["GPS"];
+                const char* token = obJson["data"]; //<< Get the Tokenized GPS position
                 String sensor_token = String(token);
                 Serial.println("Sensor Token: " + sensor_token);
   
@@ -135,7 +140,7 @@ void loop() {
                 display.setTextColor(WHITE);
                 display.setCursor(0,0);
                 display.println(httpCode);
-                display.println("test line 2");
+                //display.println(sensor_token); << Fix this, json parser not working
                 display.display();
                 delay(2000);
                 display.clearDisplay();
