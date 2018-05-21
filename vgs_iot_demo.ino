@@ -11,6 +11,7 @@
 #include <HTTPClient.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ArduinoJson.h>
 
 #define USE_SERIAL Serial
 
@@ -59,7 +60,7 @@ void setup() {
         delay(1000);
     }
 
-    wifiMulti.addAP("some-wifi-ssid", "some-wifi-pass");
+    wifiMulti.addAP("shrutefarms2", "Password1!Password1!");
 
 }
 
