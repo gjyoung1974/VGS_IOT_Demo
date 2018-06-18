@@ -15,14 +15,20 @@
 #include <ESP8266HTTPClient.h>//esp8266 HttpClient
 
 //SDA SSD1306 Display
-#include "SSD1306Wire.h"
-#include "SSD1306.h"
+#include <SSD1306Wire.h>
+#include <SSD1306.h>
+
+#include <SoftwareSerial.h>
 
 #define USE_SERIAL Serial //Serial for Debugging
 
 #define SDA_PIN D3//SDA: GPIO21 -> for Esp32
 #define SCL_PIN D5//SCL: GPIO22 -> for Esp32
 #define SSD_ADDRESS 0x3c
+byte gpsData;
+
+// The serial connection to the GPS module
+SoftwareSerial ss(12, 13);
 
 SSD1306  display(SSD_ADDRESS, SDA_PIN, SCL_PIN);
 
@@ -38,10 +44,12 @@ void setup() {
       display.drawString(0, 0, "VGS IOT Demo");
       display.display();
 
-      USE_SERIAL.begin(115200);
+      USE_SERIAL.begin(9600);
       USE_SERIAL.println();
       USE_SERIAL.println();
       USE_SERIAL.println();
+      
+      ss.begin(9600);//start sofware serial to speak to the GPS
 
     for(uint8_t t = 4; t > 0; t--) {
         USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
@@ -53,8 +61,12 @@ void setup() {
 }
 
 void loop() {
-    // wait for WiFi connection
-    if((wifiMulti.run() == WL_CONNECTED)) {
+    // wait for GPS and WiFi connections
+    while (ss.available() > 0){
+      gpsData = ss.read();
+      
+      if((wifiMulti.run() == WL_CONNECTED)) {
+
 
         HTTPClient http;
 
@@ -63,7 +75,7 @@ void loop() {
         //set any needed headers
         http.addHeader("Content-Type", "application/json");
         
-        // configure traged server and url
+        // configure server and url
         http.begin("https://tntsicixns3.SANDBOX.verygoodproxy.com/post","4ad6efaec82ca1d295bf93017e7bde5ac8881eb4"); //<< Http client requires "cert pinning"
         http.addHeader("Content-type", "application/json"); // <<Allows us to filter on just the desired data structures vs all streams
 
@@ -96,14 +108,16 @@ void loop() {
             // file found at server
             if(httpCode == HTTP_CODE_OK) {
                 String payload = http.getString();
-                USE_SERIAL.println(payload);
+                
+                USE_SERIAL.println(payload + "\n");
+                USE_SERIAL.println("gps data");
+                USE_SERIAL.println(gpsData);
 
                 //text display tests
                 display.flipScreenVertically();
                 display.setFont(ArialMT_Plain_16);
                 display.drawString(0, 20, "Result was: " + String(httpCode));
                 display.display();
-            
             }
             
         } else {
@@ -113,5 +127,6 @@ void loop() {
         http.end();
     }
 
-    delay(5000);
+      delay(5000);
+  }
 }

@@ -13,6 +13,10 @@ Screens:
 
 ![esp32x2.jpg](/docs/iot-sensor.jpg)    
 
-
+Sample Board:    
+![board1.jpg](/docs/board1.jpg)    
+![board2.jpg](/docs/board2.jpg)     
+     
+     
 ~Gordon
  
