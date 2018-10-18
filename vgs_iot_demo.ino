@@ -57,7 +57,7 @@ void setup() {
         delay(1000);
     }
 
-    wifiMulti.addAP("shrutefarms2", "Password1!Password1!");
+    wifiMulti.addAP("some-ssid-here", "SomePassword");
 }
 
 void loop() {
