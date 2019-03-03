@@ -1,7 +1,7 @@
 /**
  * vgs_iot_demo.ino
  *  gjyoung1974@gmail.com
- *  Created on: 09.12.2015
+ *  Created on: 09.12.2017
  *  Protect and Securely operate on sentive 'sensor network' data
  *  Works on an ESP8266 and ESP32-WROOM
  */
@@ -11,6 +11,8 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+
 
 // The serial connection to the GPS module
 SoftwareSerial ss(12, 13);
@@ -24,14 +26,14 @@ SoftwareSerial ss(12, 13);
 #define USE_SERIAL Serial //Serial for Debugging
 
 // setup the OLED display
-#define SDA_PIN D3
-#define SCL_PIN D5
+#define SDA_PIN D3//SDA: GPIO21 -> for Esp32
+#define SCL_PIN D5//SCL: GPIO22 -> for Esp32
 #define SSD_ADDRESS 0x3c
 
 //configure WiFi
 #ifndef STASSID
-#define STASSID "yourssid"
-#define STAPSK  "YourWifiPassword"
+#define STASSID "shrutefarms2"
+#define STAPSK  "Password1!Password1!"
 #endif
 
 const char* ssid = STASSID;
@@ -45,6 +47,10 @@ ESP8266WiFiMulti wifiMulti;
 
 // Our JSON payload
 char PostData[1024]; // "{\"GPS\": \"334484N1120740WT1526864344\", \"TEMP\": \"48.2C\"}";
+
+
+StaticJsonDocument<1024> doc;
+
 
 void setup() {
 
@@ -88,11 +94,12 @@ void setup() {
 void loop() {
     
     while (true){
+
+     sGPS="";
       
       if((wifiMulti.run() == WL_CONNECTED)) {
 
         HTTPClient http;
-        sGPS="";
 
         USE_SERIAL.print("[HTTP] begin...\n");
 
@@ -100,26 +107,20 @@ void loop() {
         http.addHeader("Content-Type", "application/json");
         
         // configure server and url
-        http.begin("https://yourtenantid.SANDBOX.verygoodproxy.com/post","1f7f92d283e33c34cac6e716837a1dd3650e60f0"); //<< Http client requires "cert pinning"
+        http.begin("https://tntmfxsd6bq.SANDBOX.verygoodproxy.com/post","1f7f92d283e33c34cac6e716837a1dd3650e60f0"); //<< Http client requires "cert pinning"
         http.addHeader("Content-type", "application/json"); // <<Allows us to filter on just the desired data structures vs all streams
 
         USE_SERIAL.print("[HTTP] POST...\n");
-        USE_SERIAL.println("gps data");
         
           while (ss.available() > 0){
             // get the char data byte from the GPS
             char gpsData = ss.read();
             sGPS += String(gpsData);//build a string
           }
-          
+
+        USE_SERIAL.println("Raw gps data:");
         USE_SERIAL.println(sGPS);
 
-        //display some tokenz
-        display.flipScreenVertically();
-        display.setFont(ArialMT_Plain_10);
-        display.drawString(0, 40, sGPS);
-        display.display();
-        
         // start connection and send HTTP header
         String("{\"GPS\": \"" + sGPS + "\", \"TEMP\": \"48.2C\"}").toCharArray(PostData,1024);
         
@@ -141,16 +142,28 @@ void loop() {
             // file found at server
             if(httpCode == HTTP_CODE_OK) {
               
-                String payload = http.getString();
+                String payload = http.getString();//get result of post
                 
                 USE_SERIAL.println(payload + "\n");
+
+                deserializeJson(doc, payload);
+                JsonObject root = doc.as<JsonObject>();//get the json root
+
+                String gps = root["json"]["GPS"];//get our aliased GPS sensor data
+                
+                USE_SERIAL.println(gps + "\n");
 
                 //Display HTTP code
                 display.flipScreenVertically();
                 display.setFont(ArialMT_Plain_10);
                 display.drawString(0, 20, "Result was: " + String(httpCode));
                 display.display();
-                
+
+                //Display token results
+                display.flipScreenVertically();
+                display.setFont(ArialMT_Plain_10);
+                display.drawString(0, 40, gps);
+                display.display();
             }
             
         } else {
