@@ -13,7 +13,6 @@
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 
-
 // The serial connection to the GPS module
 SoftwareSerial ss(12, 13);
 
@@ -32,8 +31,8 @@ SoftwareSerial ss(12, 13);
 
 //configure WiFi
 #ifndef STASSID
-#define STASSID "shrutefarms2"
-#define STAPSK  "Password1!Password1!"
+#define STASSID "yourssidhere"
+#define STAPSK  "yourwifipasswordhere"
 #endif
 
 const char* ssid = STASSID;
@@ -48,9 +47,7 @@ ESP8266WiFiMulti wifiMulti;
 // Our JSON payload
 char PostData[1024]; // "{\"GPS\": \"334484N1120740WT1526864344\", \"TEMP\": \"48.2C\"}";
 
-
 StaticJsonDocument<1024> doc;
-
 
 void setup() {
 
@@ -107,7 +104,7 @@ void loop() {
         http.addHeader("Content-Type", "application/json");
         
         // configure server and url
-        http.begin("https://tntmfxsd6bq.SANDBOX.verygoodproxy.com/post","1f7f92d283e33c34cac6e716837a1dd3650e60f0"); //<< Http client requires "cert pinning"
+        http.begin("https://yourtenantid.SANDBOX.verygoodproxy.com/post","1f7f92d283e33c34cac6e716837a1dd3650e60f0"); //<< Http client requires "cert pinning"
         http.addHeader("Content-type", "application/json"); // <<Allows us to filter on just the desired data structures vs all streams
 
         USE_SERIAL.print("[HTTP] POST...\n");
